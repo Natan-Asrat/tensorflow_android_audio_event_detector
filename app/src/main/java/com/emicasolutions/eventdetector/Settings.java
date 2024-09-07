@@ -5,6 +5,16 @@ public class Settings {
     private boolean sendLocation;
     private boolean sendAndroidID;
 
+    public long getINTERVAL_TIME_MS() {
+        return INTERVAL_TIME_MS;
+    }
+
+    public void setINTERVAL_TIME_MS(long INTERVAL_TIME_MS) {
+        this.INTERVAL_TIME_MS = INTERVAL_TIME_MS;
+    }
+
+    private long INTERVAL_TIME_MS = 60000;
+
     public boolean isSendSMS() {
         return sendSMS;
     }
@@ -44,10 +54,11 @@ public class Settings {
 
     private String triggerCodes;
 
-    public Settings(boolean sendLocation, boolean sendAndroidID, String phoneNumbers, String triggerCodes, boolean sendSMS, boolean makeCall) {
+    public Settings(boolean sendLocation, boolean sendAndroidID, String phoneNumbers, String triggerCodes, boolean sendSMS, boolean makeCall, long INTERVAL_TIME_MS) {
         this.sendLocation = sendLocation;
         this.sendAndroidID = sendAndroidID;
         this.phoneNumbers = phoneNumbers;
+        this.INTERVAL_TIME_MS = INTERVAL_TIME_MS;
         this.triggerCodes = triggerCodes;
         this.sendSMS = sendSMS;
         this.makeCall = makeCall;

@@ -8,6 +8,7 @@ import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.content.res.AssetManager;
+import android.location.Location;
 import android.os.Bundle;
 import android.util.Log;
 import android.widget.TextView;
@@ -16,6 +17,7 @@ import android.widget.Toast;
 import androidx.activity.EdgeToEdge;
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.ContextCompat;
 import androidx.core.graphics.Insets;
@@ -28,6 +30,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.HashMap;
 import java.util.Map;
+
 
 public class MainActivity extends AppCompatActivity {
     static Map<Integer, String> labelsMap;
@@ -62,12 +65,14 @@ public class MainActivity extends AppCompatActivity {
         // Check and request permissions
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED ||
                 ContextCompat.checkSelfPermission(this, Manifest.permission.RECORD_AUDIO) != PackageManager.PERMISSION_GRANTED ||
-                ContextCompat.checkSelfPermission(this, Manifest.permission.SEND_SMS) != PackageManager.PERMISSION_GRANTED) {
+                ContextCompat.checkSelfPermission(this, Manifest.permission.SEND_SMS) != PackageManager.PERMISSION_GRANTED ||
+                ContextCompat.checkSelfPermission(this, Manifest.permission.CALL_PHONE) != PackageManager.PERMISSION_GRANTED) {
 
             requestPermissionsLauncher.launch(new String[]{
                     Manifest.permission.ACCESS_FINE_LOCATION,
                     Manifest.permission.RECORD_AUDIO,
-                    Manifest.permission.SEND_SMS
+                    Manifest.permission.SEND_SMS,
+                    Manifest.permission.CALL_PHONE
             });
         } else {
             // Permissions already granted, start the service
@@ -125,12 +130,13 @@ public class MainActivity extends AppCompatActivity {
                 Boolean locationGranted = result.get(Manifest.permission.ACCESS_FINE_LOCATION);
                 Boolean audioGranted = result.get(Manifest.permission.RECORD_AUDIO);
                 Boolean smsGranted = result.get(Manifest.permission.SEND_SMS);
+                Boolean callGranted = result.get(Manifest.permission.CALL_PHONE);
 
-                if (Boolean.TRUE.equals(locationGranted) && Boolean.TRUE.equals(audioGranted) && Boolean.TRUE.equals(smsGranted)) {
+                if (Boolean.TRUE.equals(locationGranted) && Boolean.TRUE.equals(audioGranted) && Boolean.TRUE.equals(smsGranted) && Boolean.TRUE.equals(callGranted)) {
                     // Start the background service if all permissions are granted
                     saveSettingsAndStartService();
                 } else {
-                    Log.e(TAG, "Location, microphone, or SMS permissions not granted");
+                    Log.e(TAG, "Location, microphone, SMS, or CALL permissions not granted");
                     Toast.makeText(this, "Permissions not granted!", Toast.LENGTH_SHORT).show();
                 }
             });
@@ -140,10 +146,11 @@ public class MainActivity extends AppCompatActivity {
         Settings settings = new Settings(
                 true,  // Send location
                 true,  // Send Android ID
-                "0965929392/0908560168", // Example phone numbers
-                "0,101,102", // Example trigger codes
+                "0908560168/0965929392", // Example phone numbers
+                "0,494,101,102", // Example trigger codes
                 true,  // Enable sending SMS
-                false  // Disable making calls for now
+                true,
+                60000
         );
         saveSettings(settings);
 
@@ -153,7 +160,6 @@ public class MainActivity extends AppCompatActivity {
         Toast.makeText(this, "Background service started", Toast.LENGTH_SHORT).show();
         Log.d(TAG, "Background service started");
     }
-
 
     private void saveSettings(Settings settings) {
         SharedPreferences.Editor editor = sharedPreferences.edit();

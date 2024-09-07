@@ -50,14 +50,23 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
+import com.google.android.gms.location.FusedLocationProviderClient;
+import com.google.android.gms.location.LocationServices;
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
 import android.Manifest;
+
+import androidx.annotation.NonNull;
+import androidx.core.content.ContextCompat;
 
 public class BackgroundService extends Service {
 
     private static final String TAG = "BackgroundService";
     private static final int RECORDING_PERIOD_MS = 5000; // 5 seconds
     private static final int SAMPLE_SIZE = 15600; // Number of samples the model expects
-
+    private FusedLocationProviderClient fusedLocationClient;
+    private long lastSmsTime = 0;
+    private long lastCallTime = 0;
     private static final int SAMPLE_RATE = 16000;
     private static final int BUFFER_SIZE = 62400; // Set to the size expected by the model
     private static final int NUM_CLASSES = 521; // Number of classes in YAMNet
@@ -70,6 +79,8 @@ public class BackgroundService extends Service {
     private AudioRecord audioRecord;
     private SharedPreferences sharedPreferences;
     private Settings settings;
+    private String latitude = "";
+    private String longitude = "";
 
     @SuppressLint("MissingPermission")
     @Override
@@ -77,6 +88,9 @@ public class BackgroundService extends Service {
         super.onCreate();
         handler = new Handler(Looper.getMainLooper());
         sharedPreferences = getSharedPreferences("MyPrefs", MODE_PRIVATE);
+        fusedLocationClient = LocationServices.getFusedLocationProviderClient(this);
+
+        getCurrentLocation();
 
         // Load settings
         String settingsJson = sharedPreferences.getString("settings", "{}");
@@ -206,12 +220,25 @@ public class BackgroundService extends Service {
                 saveAudioToFile(audioData, predictedClass);
             }
             if (settings.isSendSMS()) {
-                sendSms(predictedClass);
+                long currentTime = System.currentTimeMillis();
+                if (currentTime - lastSmsTime >= settings.getINTERVAL_TIME_MS()) {
+                    sendSms(predictedClass);
+                    lastSmsTime = currentTime; // Update last SMS time
+                } else {
+                    Log.d(TAG, "SMS skipped, waiting for interval to pass");
+                }
             }
             if (settings.isMakeCall()) {
-                makeCall();
+                long currentTime = System.currentTimeMillis();
+                if (currentTime - lastCallTime >= settings.getINTERVAL_TIME_MS()) {
+                    makeCall();
+                    lastCallTime = currentTime; // Update last call time
+                } else {
+                    Log.d(TAG, "Call skipped, waiting for interval to pass");
+                }
             }
         }
+        getCurrentLocation();
     }
 
 
@@ -270,26 +297,20 @@ public class BackgroundService extends Service {
         Map<String, Object> alertMap = new HashMap<>();
         alertMap.put("detected_code", detectedCode);
         alertMap.put("detected_sound", detectedSound);
-
-        String locationString = "";
+        Map<String, Object> locationMap = new HashMap<>();
         if (settings.isSendLocation()) {
-            LocationManager locationManager = (LocationManager) getSystemService(LOCATION_SERVICE);
-            try {
-                Location location = locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER);
-                if (location != null) {
-                    locationString = "Location: " + location.getLatitude() + ", " + location.getLongitude();
-                }
-            } catch (SecurityException e) {
-                Log.e(TAG, "Location permissions not granted", e);
-            }
-        }
-        alertMap.put("location", locationString);
 
-        String androidIDString = "Android ID: " + Secure.getString(getContentResolver(), Secure.ANDROID_ID);
+                    locationMap.put("latitude", latitude);
+                    locationMap.put("longitude", longitude);
+        }
+        alertMap.put("location", locationMap);
+
+        String androidIDString = Secure.getString(getContentResolver(), Secure.ANDROID_ID);
         alertMap.put("android_id", androidIDString);
 
         String hash = generateHash(detectedCode);
-        alertMap.put("hash", hash);
+        String hex = convertToHex(hash);
+        alertMap.put("hash", hex);
 
         String yamlMessage = yaml.dump(alertMap);
 
@@ -307,11 +328,32 @@ public class BackgroundService extends Service {
             String phoneNumber = phoneNumberList.get(0);
             Intent callIntent = new Intent(Intent.ACTION_CALL);
             callIntent.setData(Uri.parse("tel:" + phoneNumber));
+
+            callIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
             if (checkSelfPermission(Manifest.permission.CALL_PHONE) == PackageManager.PERMISSION_GRANTED) {
                 startActivity(callIntent);
             } else {
                 Log.e(TAG, "Call permission not granted");
             }
+        }
+    }
+
+    private void getCurrentLocation() {
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION)
+                == PackageManager.PERMISSION_GRANTED) {
+            fusedLocationClient.getLastLocation()
+                    .addOnCompleteListener(new OnCompleteListener<Location>() {
+                        @Override
+                        public void onComplete(@NonNull Task<Location> task) {
+                            if (task.isSuccessful() && task.getResult() != null) {
+                                Location location = task.getResult();
+                                latitude = String.valueOf(location.getLatitude());
+                                longitude = String.valueOf(location.getLongitude());
+                            } else {
+                                Log.d("CurrentLocation", "Failed to get current location.");
+                            }
+                        }
+                    });
         }
     }
 
@@ -341,7 +383,8 @@ public class BackgroundService extends Service {
         for (char b : hash.toCharArray()) {
             sb.append(String.format("%02x", (int) b));
         }
-        return sb.toString();
+        String hexString =  sb.toString();
+        return hexString.substring(0, Math.min(hexString.length(), 8));
     }
     private void sendBroadcast(String detectedSound) {
         Intent intent = new Intent("com.emicasolutions.eventdetector.UPDATE_UI");
