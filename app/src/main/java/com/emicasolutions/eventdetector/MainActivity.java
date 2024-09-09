@@ -11,6 +11,7 @@ import android.content.res.AssetManager;
 import android.location.Location;
 import android.os.Bundle;
 import android.util.Log;
+import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -60,6 +61,22 @@ public class MainActivity extends AppCompatActivity {
         registerReceiver(updateUIReceiver, filter);
         // Initialize shared preferences
         sharedPreferences = getSharedPreferences("MyPrefs", MODE_PRIVATE);
+        String settingsJson = sharedPreferences.getString("settings", null);
+        if (settingsJson == null) {
+            // If settings are not set, go to SettingsActivity
+            Intent intent = new Intent(MainActivity.this, SettingsActivity.class);
+            startActivity(intent);
+            finish(); // Optionally finish MainActivity if you want to prevent going back
+            return;
+        }
+
+        // Add button to go to SettingsActivity
+        Button settingsButton = findViewById(R.id.settings_button);
+        settingsButton.setOnClickListener(v -> {
+            Intent intent = new Intent(MainActivity.this, SettingsActivity.class);
+            startActivity(intent);
+        });
+
         labelsMap = loadLabels(this);
         Log.i("model", "label 0 is " + labelsMap.get(0));
         // Check and request permissions
@@ -143,16 +160,6 @@ public class MainActivity extends AppCompatActivity {
 
     private void saveSettingsAndStartService() {
         // Save settings to SharedPreferences with SMS enabled
-        Settings settings = new Settings(
-                true,  // Send location
-                true,  // Send Android ID
-                "0908560168/0965929392", // Example phone numbers
-                "0,494,101,102", // Example trigger codes
-                true,  // Enable sending SMS
-                true,
-                60000
-        );
-        saveSettings(settings);
 
         // Start the background service
         Intent serviceIntent = new Intent(this, BackgroundService.class);

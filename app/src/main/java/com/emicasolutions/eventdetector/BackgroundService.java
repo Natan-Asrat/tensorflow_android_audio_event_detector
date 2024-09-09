@@ -54,6 +54,8 @@ import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
+import com.google.gson.Gson;
+
 import android.Manifest;
 
 import androidx.annotation.NonNull;
@@ -95,8 +97,22 @@ public class BackgroundService extends Service {
         // Load settings
         String settingsJson = sharedPreferences.getString("settings", "{}");
         settings = Settings.fromJson(settingsJson);
-        triggerCodeArray = settings.getTriggerCodes().split(",");
-        // Initialize YAMNet
+        try {
+            String triggerCodesJson = settings.getTriggerCodes(); // Assuming this returns a JSON string
+            triggerCodeArray = new Gson().fromJson(triggerCodesJson, String[].class); // Parsing the JSON array into a String array
+        } catch (Exception e) {
+            Log.e(TAG, "Failed to parse trigger codes", e);
+            triggerCodeArray = new String[0]; // Handle parse failure by setting an empty array
+        }        // Initialize YAMNet
+        Log.i(TAG, "Loaded settings: " + settingsJson);
+
+        // Initialize and log trigger codes
+        Log.i(TAG, "Trigger codes: " + Arrays.toString(triggerCodeArray));
+
+        // Log phone numbers
+        List<String> phoneNumberList = Arrays.asList(settings.getPhoneNumbers().split("/"));
+        Log.i(TAG, "Registered phone numbers: " + phoneNumberList.toString());
+
         try {
             MappedByteBuffer tfliteModel = loadModelFile();
             interpreter = new Interpreter(tfliteModel);

@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:padding="16dp">
+
+    <Button
+        android:id="@+id/save_button"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="end"
+        android:text="Save"/>
+
+    <EditText
+        android:id="@+id/phone_numbers"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="Phone Numbers (separate with /)"
+        android:inputType="phone"/>
+
+    <Switch
+        android:id="@+id/send_sms_switch"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Send SMS"/>
+
+    <Switch
+        android:id="@+id/send_location_switch"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Send Location"/>
+    <Switch
+        android:id="@+id/make_call_switch"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Make Call"/>
+
+    <AutoCompleteTextView
+        android:id="@+id/auto_complete_triggers"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="Select Trigger Codes"/>
+
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/trigger_recycler_view"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"/>
+
+
+</LinearLayout>

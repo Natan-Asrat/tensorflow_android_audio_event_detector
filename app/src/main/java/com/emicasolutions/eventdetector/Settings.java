@@ -1,6 +1,14 @@
 package com.emicasolutions.eventdetector;
 import com.google.gson.Gson;
 
+import org.json.JSONArray;
+import org.json.JSONException;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.stream.Collectors;
+
 public class Settings {
     private boolean sendLocation;
     private boolean sendAndroidID;
@@ -62,6 +70,18 @@ public class Settings {
         this.triggerCodes = triggerCodes;
         this.sendSMS = sendSMS;
         this.makeCall = makeCall;
+    }
+    public List<Integer> getTriggerIndexes() {
+        List<Integer> triggerIndexes = new ArrayList<>();
+        try {
+            JSONArray jsonArray = new JSONArray(triggerCodes); // assuming triggerCodes is stored as JSON string
+            for (int i = 0; i < jsonArray.length(); i++) {
+                triggerIndexes.add(jsonArray.getInt(i)); // Extract each integer from the JSON array
+            }
+        } catch (JSONException e) {
+            e.printStackTrace(); // Handle error if JSON is invalid
+        }
+        return triggerIndexes;
     }
 
     public boolean isSendLocation() {
