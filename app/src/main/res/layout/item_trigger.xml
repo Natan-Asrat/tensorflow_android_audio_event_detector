@@ -2,18 +2,46 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:orientation="horizontal"
+    android:orientation="vertical"
     android:padding="8dp">
 
-    <TextView
-        android:id="@+id/trigger_text"
-        android:layout_width="0dp"
+    <!-- Horizontal layout for trigger text, checkbox, and dropdown icon -->
+    <LinearLayout
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_weight="1"
-        android:text="Trigger Code"/>
+        android:orientation="horizontal"
+        android:gravity="center_vertical">
 
-    <CheckBox
-        android:id="@+id/trigger_checkbox"
+        <TextView
+            android:id="@+id/trigger_text"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="Trigger Code"/>
+
+        <CheckBox
+            android:id="@+id/trigger_checkbox"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"/>
+
+        <!-- Dropdown icon -->
+        <ImageView
+            android:id="@+id/dropdown_icon"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:src="@android:drawable/arrow_down_float"
+            android:padding="16dp"
+            android:contentDescription="dropdown"/>
+    </LinearLayout>
+
+    <!-- Image that will be toggled on/off when dropdown icon is clicked -->
+    <ImageView
+        android:id="@+id/trigger_image"
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content"/>
+        android:layout_height="wrap_content"
+        android:adjustViewBounds="true"
+        android:visibility="gone"
+        android:scaleType="centerCrop"
+        android:contentDescription="image"/>
+
 </LinearLayout>

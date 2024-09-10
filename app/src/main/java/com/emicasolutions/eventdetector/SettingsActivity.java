@@ -166,10 +166,10 @@ public class SettingsActivity extends AppCompatActivity {
             List<TriggerItem> reorderedTriggers = reorderTriggers(triggerList, selectedIndexes);
 
             // Initialize adapter with reordered list and preselected triggers
-            triggerAdapter = new TriggerAdapter(reorderedTriggers, selectedIndexes);
+            triggerAdapter = new TriggerAdapter(this,reorderedTriggers, selectedIndexes);
         } else {
             // If no settings are found, load triggers normally
-            triggerAdapter = new TriggerAdapter(triggerList);
+            triggerAdapter = new TriggerAdapter(this, triggerList);
         }
 
         triggerRecyclerView.setLayoutManager(new LinearLayoutManager(this));

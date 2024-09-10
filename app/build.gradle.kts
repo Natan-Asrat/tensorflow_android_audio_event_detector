@@ -33,6 +33,7 @@ android {
 }
 
 dependencies {
+    implementation(libs.glide)
     implementation(libs.yaml)
     implementation(libs.gson)
     implementation(libs.appcompat)

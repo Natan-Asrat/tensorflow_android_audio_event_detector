@@ -226,7 +226,7 @@ public class BackgroundService extends Service {
         String detectedSound = MainActivity.labelsMap.getOrDefault(predictedClass, "Unknown");
 
         // Send broadcast with detected sound
-        sendBroadcast(detectedSound);
+        sendBroadcast(String.valueOf(predictedClass),detectedSound);
         Log.i("model", "Alert: Detected event with code " + predictedClass + " sound " + detectedSound);
         // Save and handle the recorded audio based on settings
         String predictedClassString = String.valueOf(predictedClass);
@@ -402,9 +402,10 @@ public class BackgroundService extends Service {
         String hexString =  sb.toString();
         return hexString.substring(0, Math.min(hexString.length(), 8));
     }
-    private void sendBroadcast(String detectedSound) {
+    private void sendBroadcast(String detectedCode, String detectedSound) {
         Intent intent = new Intent("com.emicasolutions.eventdetector.UPDATE_UI");
         intent.putExtra("detected_sound", detectedSound);
+        intent.putExtra("detected_code", detectedCode);
         sendBroadcast(intent);
     }
 

@@ -12,6 +12,7 @@ import android.location.Location;
 import android.os.Bundle;
 import android.util.Log;
 import android.widget.Button;
+import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -24,6 +25,8 @@ import androidx.core.content.ContextCompat;
 import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
+
+import com.bumptech.glide.Glide;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -40,7 +43,7 @@ public class MainActivity extends AppCompatActivity {
     private TextView labelTextView;
     private SharedPreferences sharedPreferences;
     private static final String TAG = "MainActivity";
-
+    private ImageView audioGifView;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -55,7 +58,7 @@ public class MainActivity extends AppCompatActivity {
         });
 
         labelTextView = findViewById(R.id.label);
-
+        audioGifView = findViewById(R.id.audioGifView);
         // Register BroadcastReceiver
         IntentFilter filter = new IntentFilter(ACTION_UPDATE_UI);
         registerReceiver(updateUIReceiver, filter);
@@ -102,12 +105,38 @@ public class MainActivity extends AppCompatActivity {
         public void onReceive(Context context, Intent intent) {
             if (intent != null) {
                 String detectedSound = intent.getStringExtra("detected_sound");
+                String detectedCode = intent.getStringExtra("detected_code");
                 if (detectedSound != null) {
                     labelTextView.setText(detectedSound);
+                }
+                if(detectedCode!=null){
+                    loadGifByLabel(detectedCode);
                 }
             }
         }
     };
+    private void loadGifByLabel(String label) {
+        ImageView gifView = findViewById(R.id.audioGifView);
+        AssetManager assetManager = getAssets();
+
+        try {
+            // Check if the GIF exists in the assets folder
+            InputStream inputStream = assetManager.open("images/" + label + ".jpg");
+            inputStream.close(); // Close stream if found
+
+            // Construct the path to the GIF in assets
+            String imagePath = "file:///android_asset/images/" + label + ".jpg";
+
+            // Load the GIF using Glide
+            Glide.with(this)
+                    .load(imagePath)
+                    .into(gifView);
+        } catch (IOException e) {
+            // Handle the case where the GIF is not found (optional)
+            Toast.makeText(this, "Respective image not found!", Toast.LENGTH_SHORT).show();
+        }
+    }
+
 
     @Override
     protected void onDestroy() {
