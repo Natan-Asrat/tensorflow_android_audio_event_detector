@@ -8,7 +8,7 @@ android {
 
     defaultConfig {
         applicationId = "com.emicasolutions.eventdetector"
-        minSdk = 24
+        minSdk = 26
         targetSdk = 34
         versionCode = 1
         versionName = "1.0"
@@ -33,6 +33,16 @@ android {
 }
 
 dependencies {
+
+    implementation(libs.paypal)
+    implementation(libs.paypalsdk)
+    implementation(libs.retrofit)
+    implementation(libs.retrofitgson)
+    implementation(platform(libs.firebase.bom))
+    implementation(libs.firebase.analytics)
+    implementation(libs.formatter)
+    implementation(libs.billing)
+
     implementation(libs.glide)
     implementation(libs.yaml)
     implementation(libs.gson)

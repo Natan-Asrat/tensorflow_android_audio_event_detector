@@ -1,8 +1,10 @@
 package com.emicasolutions.eventdetector;
 
 import android.content.Context;
+import android.content.Intent;
 import android.content.res.AssetManager;
 import android.graphics.Bitmap;
+import android.os.Build;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -12,6 +14,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
+import androidx.appcompat.app.AlertDialog;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.bumptech.glide.Glide;
@@ -26,20 +29,23 @@ import java.util.Set;
 public class TriggerAdapter extends RecyclerView.Adapter<TriggerAdapter.TriggerViewHolder> {
 
     private final Context context;
+    private  EmptyCallback popupCallback;
     private List<TriggerItem> triggerList;
     private Set<Integer> selectedIndexes;
     private ImageView lastDropdown=null;
 
     // Constructor
-    public TriggerAdapter(Context context, List<TriggerItem> triggerList, List<Integer> selectedIndexes) {
+    public TriggerAdapter(Context context, List<TriggerItem> triggerList, List<Integer> selectedIndexes, EmptyCallback popupCallback) {
         this.triggerList = triggerList;
         this.context = context;
+        this.popupCallback = popupCallback;
         this.selectedIndexes = new HashSet<>(selectedIndexes); // Avoid duplicates
     }
 
-    public TriggerAdapter(Context context, List<TriggerItem> triggerList) {
+    public TriggerAdapter(Context context, List<TriggerItem> triggerList, EmptyCallback popupCallback) {
         this.triggerList = triggerList;
         this.context = context;
+        this.popupCallback = popupCallback;
         this.selectedIndexes = new HashSet<>();
     }
 
@@ -67,6 +73,9 @@ public class TriggerAdapter extends RecyclerView.Adapter<TriggerAdapter.TriggerV
             } else {
                 selectedIndexes.remove(triggerItem.getIndex());
             }
+            if (selectedIndexes.size() > 3) {
+                popupCallback.execute(); // Show the popup if more than 3 are selected
+            }
         });
         holder.itemView.setOnClickListener(v -> {
             if(lastDropdown!=null){
@@ -88,6 +97,8 @@ public class TriggerAdapter extends RecyclerView.Adapter<TriggerAdapter.TriggerV
 
         });
     }
+
+
     private void loadImageFromAssets(String imageId, ImageView imageView) {
         AssetManager assetManager = context.getAssets();
 

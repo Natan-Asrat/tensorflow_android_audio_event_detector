@@ -41,7 +41,7 @@
         android:id="@+id/auto_complete_triggers"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:hint="Select Trigger Codes"/>
+        android:hint="Search for Trigger Sounds"/>
 
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/trigger_recycler_view"

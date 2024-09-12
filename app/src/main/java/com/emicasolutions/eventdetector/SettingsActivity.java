@@ -5,6 +5,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.res.AssetManager;
+import android.os.Build;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.InputType;
@@ -12,10 +13,12 @@ import android.text.TextWatcher;
 import android.widget.ArrayAdapter;
 import android.widget.AutoCompleteTextView;
 import android.widget.Button;
+import android.widget.CompoundButton;
 import android.widget.EditText;
 import android.widget.Switch;
 import android.widget.Toast;
 
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -41,6 +44,10 @@ public class SettingsActivity extends AppCompatActivity {
     private TriggerAdapter triggerAdapter;
     private List<TriggerItem> triggerList;
     private Switch makeCallSwitch;
+    private AlertDialog alertDialog;
+
+    static ProductVersion version;
+    static LoadingDialog loadingDialog;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -49,9 +56,22 @@ public class SettingsActivity extends AppCompatActivity {
 
         sharedPreferences = getSharedPreferences("MyPrefs", MODE_PRIVATE);
 
+        loadingDialog = new LoadingDialog();
+        loadingDialog.show(getSupportFragmentManager(), "loading");
+        loadingDialog.dismiss();
+        version = new ProductVersion(this, this::gotoSubscriptionsActivity, this::showLoading);
+
         phoneNumbersEditText = findViewById(R.id.phone_numbers);
         sendSmsSwitch = findViewById(R.id.send_sms_switch);
         makeCallSwitch = findViewById(R.id.make_call_switch);
+        makeCallSwitch.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton compoundButton, boolean b) {
+                if(b){
+                    showPopupIfTrial();
+                }
+            }
+        });
         sendLocationSwitch = findViewById(R.id.send_location_switch);
         triggerCodesAutoComplete = findViewById(R.id.auto_complete_triggers);
         triggerRecyclerView = findViewById(R.id.trigger_recycler_view);
@@ -112,6 +132,58 @@ public class SettingsActivity extends AppCompatActivity {
             }
         });
     }
+    public void showPopupIfTrial(){
+        if (SettingsActivity.version.isTrialVersion()) {
+            // Handle trial version
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                SettingsActivity.loadingDialog.dismiss();
+                showTrialExpiredPopup();
+            }
+        }
+    }
+    private void showTrialExpiredPopup() {
+        alertDialog = new AlertDialog.Builder(this)
+                .setTitle("Activate Full Version")
+                .setMessage("You are using the trial version. Please upgrade to the full version.")
+                .setPositiveButton("Subscribe via Google Play", (dialog, which) -> {
+                    // Launch the activity or process for Google Play subscription
+                    version.googlePlayOps.gotoPlay();
+                })
+                .setNegativeButton("Pay with Paypal", (dialogInterface, i) -> {
+                    Intent browserIntent = new Intent(this, PaypalActivity.class);
+                    startActivity(browserIntent);
+                })
+                .setNeutralButton("Activate Manually", (dialog, which) -> {
+                    Intent intent = new Intent(SettingsActivity.this, ChoosePriceTier.class);
+                    startActivity(intent);
+                    finish();
+                })
+                .setCancelable(false)
+                .show();
+    }
+
+
+    public void gotoSubscriptionsActivity(){
+        if(alertDialog!=null){
+            alertDialog.dismiss();
+        }
+        if (loadingDialog != null && loadingDialog.isAdded()) {
+            // Only dismiss if the dialog is attached to the FragmentManager
+            loadingDialog.dismiss();
+        }
+        Intent i = new Intent(this, GooglePlaySubscriptionActivity.class);
+        startActivity(i);
+    }
+    private void showLoading() {
+        if(alertDialog!=null){
+            alertDialog.dismiss();
+
+        }
+        if(loadingDialog!=null){
+            loadingDialog.show(getSupportFragmentManager(), "loading");
+
+        }
+    }
 
     private void filterRecyclerViewTriggers(String query) {
         List<TriggerItem> filteredList = new ArrayList<>();
@@ -166,10 +238,10 @@ public class SettingsActivity extends AppCompatActivity {
             List<TriggerItem> reorderedTriggers = reorderTriggers(triggerList, selectedIndexes);
 
             // Initialize adapter with reordered list and preselected triggers
-            triggerAdapter = new TriggerAdapter(this,reorderedTriggers, selectedIndexes);
+            triggerAdapter = new TriggerAdapter(this,reorderedTriggers, selectedIndexes, this::showPopupIfTrial);
         } else {
             // If no settings are found, load triggers normally
-            triggerAdapter = new TriggerAdapter(this, triggerList);
+            triggerAdapter = new TriggerAdapter(this, triggerList, this::showPopupIfTrial);
         }
 
         triggerRecyclerView.setLayoutManager(new LinearLayoutManager(this));

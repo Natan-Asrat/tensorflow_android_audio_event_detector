@@ -44,6 +44,7 @@ public class MainActivity extends AppCompatActivity {
     private SharedPreferences sharedPreferences;
     private static final String TAG = "MainActivity";
     private ImageView audioGifView;
+    static String SECRET_KEY="";
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);

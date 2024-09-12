@@ -73,7 +73,6 @@ public class BackgroundService extends Service {
     private static final int BUFFER_SIZE = 62400; // Set to the size expected by the model
     private static final int NUM_CLASSES = 521; // Number of classes in YAMNet
     private static final String MODEL_PATH = "model.tflite";
-    private static final String SECRET_KEY = "your-secret-key"; // Replace with your secret key
     private String[] triggerCodeArray ;
     private Handler handler;
     private Runnable runnable;
@@ -376,7 +375,7 @@ public class BackgroundService extends Service {
     private String generateHash(int detectedCode) {
         try {
             MessageDigest digest = MessageDigest.getInstance("SHA-256");
-            String text = detectedCode + SECRET_KEY;
+            String text = detectedCode + MainActivity.SECRET_KEY;
             byte[] hash = digest.digest(text.getBytes());
             StringBuilder hexString = new StringBuilder();
             for (byte b : hash) {

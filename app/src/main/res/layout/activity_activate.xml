@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+<LinearLayout
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:id="@+id/main"
+    android:gravity="center|top"
+    android:padding="16dp"
+    android:layout_marginHorizontal="24dp"
+    >
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Your UID:"
+        android:textSize="16sp"
+        android:layout_marginTop="24dp"/>
+    <TextView
+        android:id="@+id/uidField"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="UID"
+        android:textSize="18sp"/>
+
+    <Button
+        android:id="@+id/copyButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Copy UID" />
+
+    <EditText
+        android:id="@+id/inputField"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="Enter Registration Key"
+        android:layout_marginTop="24dp"/>
+
+    <Button
+        android:id="@+id/verifyButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Verify" />
+
+    <TextView
+        android:id="@+id/resultLabel"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text=""
+        android:textSize="18sp" />
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Your trial period has ended!!\nHow to buy license key:\nCopy the number given to you in the UID above and send it to a Eureka admin:\nTelegram: @fail_your_way_to_success\nEmail: nathanyilmaasrat@gmail.com\nLinkedin: https://www.linkedin.com/in/natan-asrat/\nAfter making the requested payment, the admin will provide you with your registration key.\nEnter the registration key and press Verify."
+        android:textSize="18sp"
+        android:textIsSelectable="true"/>
+
+</LinearLayout>
+</ScrollView>
